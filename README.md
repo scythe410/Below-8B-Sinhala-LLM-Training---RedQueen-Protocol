@@ -101,22 +101,4 @@ answer = full_response.split("<|start_header_id|>assistant<|end_header_id|>\\n\\
 print(answer.strip())
 print("="*50)
 ```
----
-license: mit
-language:
-- si
-library_name: transformers
-tags:
-- llama-3
-- sinhala
-- generative-qa
-- iciit-2025
-- lora
-datasets:
-- RedQueenProtocol/all-articles-from-sinhala-wikipedia-2025-parquet
-- RedQueenProtocol/sinhala-qna-530-rows
-- ihalage/sinhala-finetune-qa-eli5
-- janani-rane/SiQuAD
-base_model:
-- meta-llama/Llama-3.2-3B-Instruct
----
+Made with ❤️ by RQ.
