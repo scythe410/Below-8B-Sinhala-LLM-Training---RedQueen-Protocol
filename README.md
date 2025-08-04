@@ -4,11 +4,13 @@
 <br>
 **GitHub Repo for Scripts and Notebooks:** [Click here](https://github.com/scythe410/Below-8B-Sinhala-LLM-Training---RedQueen-Protocol)
 
+- **Model here:** [click](https://huggingface.co/iCIIT/redqueenprotocol-sin-llama3.2-3B-model)
+- **Adapter here:** [click](https://huggingface.co/iCIIT/redqueenprotocol-sin-llama3.2-3B-LoRA)
+
 - **Developed by:** [Red Queen Protocol](https://huggingface.co/RedQueenProtocol)
 - **Team:** [Ramiru De Silva](https://www.linkedin.com/in/ramirudesilva/), [Senadhi Thimanya](https://www.linkedin.com/in/senadhi-chandrasekara/)
 - **Language(s) (NLP):** Sinhala
 - **Finetuned from model:** [Llama 3.2 3B IT](https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct)
-
 
 
 This model and LoRA was developed by Ramiru De Silva and Senadhi Thimanya (Team: [RedQueen Protocol](https://huggingface.co/RedQueenProtocol)) for the iCIIT Conclave 2025 Shared Task on Building Compact Sinhala & Tamil LLMs. 
@@ -58,8 +60,8 @@ import warnings
 
 # --- 3. Configuration ---
 # Now both the base model and adapter are loaded from the iCIIT organization.
-base_model_id = "iCIIT/sinhala-llama-rq-model"
-adapter_id = "iCIIT/sinhala-llama-rq-LoRA"
+base_model_id = "iCIIT/redqueenprotocol-sin-llama3.2-3B-model"
+adapter_id = "iCIIT/redqueenprotocol-sin-llama3.2-3B-LoRA"
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # --- 4. Load Model and Adapter ---
@@ -101,4 +103,4 @@ answer = full_response.split("<|start_header_id|>assistant<|end_header_id|>\\n\\
 print(answer.strip())
 print("="*50)
 ```
-Made with ❤️ by RQ.
+Made with ❤️ by RQ
