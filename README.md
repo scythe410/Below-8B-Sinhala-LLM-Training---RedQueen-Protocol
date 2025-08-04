@@ -30,43 +30,93 @@ The training sequence was as follows:
 2. **Ihalage ELI5 Dataset:** Continued training the same adapter on 10,000 samples from the `ihalage/sinhala-finetune-qa-eli5` dataset.
 3. **SiQuAD Dataset:** Performed a final round of training on 13,500 samples from the `janani-rane/SiQuAD` dataset, formatting the inputs as "Context: ... Question: ... Answer: ...".
 
-The **final LoRA adapter**, containing the combined knowledge of all three datasets **and the Wikipedia-tuned base model** was then uploaded here.
+The **final LoRA adapter**, containing the combined knowledge of all three datasets **and the Wikipedia-tuned base model** was then uploaded here in seperate repositories.
 
 ## How to Use
 
-You can use this model directly with the `transformers` library pipeline.
-
 ```python
+
+# For Kaggle:
+#from kaggle_secrets import UserSecretsClient
+#from huggingface_hub import login
+#user_secrets = UserSecretsClient()
+#hf_token = user_secrets.get_secret("HF_TOKEN")
+#login(token=hf_token)
+
+# For Colab:
+#from huggingface_hub import notebook_login
+#notebook_login()
+
+# --- 1. Install Libraries ---
+!pip install -q -U transformers accelerate bitsandbytes peft
+
+# --- 2. Import Libraries ---
 import torch
-from transformers import pipeline
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+from peft import PeftModel
+import warnings
 
-# Load the model and tokenizer
-model_id = "RedQueenProtocol/llama-3.2-3b-it-sinhala-qa-merged"
+# --- 3. Configuration ---
+# Now both the base model and adapter are loaded from the iCIIT organization.
+base_model_id = "iCIIT/sinhala-llama-rq-model"
+adapter_id = "iCIIT/sinhala-llama-rq-LoRA"
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
-generator = pipeline(
-    "text-generation",
-    model=model_id,
-    model_kwargs={"torch_dtype": torch.bfloat16},
-    device="cuda",
+# --- 4. Load Model and Adapter ---
+print(f"Loading base model from: {base_model_id}")
+base_model = AutoModelForCausalLM.from_pretrained(
+    base_model_id,
+    torch_dtype=torch.bfloat16,
+    device_map=device,
 )
+tokenizer = AutoTokenizer.from_pretrained(base_model_id)
+tokenizer.pad_token = tokenizer.eos_token
 
-# Prepare a question using the Llama 3 chat template
-question = "ශ්‍රී ලංකාවේ උසම කන්ද කුමක්ද?"
+print(f"Applying LoRA adapter from: {adapter_id}")
+model = PeftModel.from_pretrained(base_model, adapter_id)
+print("\n Model and adapter loaded successfully from the iCIIT repositories.")
+
+# --- 5. Run a Sample Prompt ---
+generator = pipeline("text-generation", model=model, tokenizer=tokenizer)
+question = "ශ්‍රී ලංකා ජාතික ධජය නිර්මාණය කළේ කවුද?"
+
 prompt = f"<|begin_of_text|><|start_header_id|>user<|end_header_id|>\\n\\n{question}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\\n\\n"
 
-# Generate a response
+print("\n" + "="*50)
+print(f"USER: {question}")
+print("\nASSISTANT: Generating...")
+
 outputs = generator(
     prompt,
     max_new_tokens=256,
-    eos_token_id=generator.tokenizer.eos_token_id,
+    eos_token_id=tokenizer.eos_token_id,
     do_sample=True,
     temperature=0.6,
     top_p=0.9,
 )
 
-# Extract and print the answer
 full_response = outputs[0]['generated_text']
 answer = full_response.split("<|start_header_id|>assistant<|end_header_id|>\\n\\n")[1].replace("<|eot_id|>", "")
 
-print(f"Question: {question}")
-print(f"Answer: {answer.strip()}")
+print(answer.strip())
+print("="*50)
+```
+---
+license: mit
+language:
+- si
+library_name: transformers
+tags:
+- llama-3
+- sinhala
+- generative-qa
+- iciit-2025
+- lora
+datasets:
+- RedQueenProtocol/all-articles-from-sinhala-wikipedia-2025-parquet
+- RedQueenProtocol/sinhala-qna-530-rows
+- ihalage/sinhala-finetune-qa-eli5
+- janani-rane/SiQuAD
+base_model:
+- meta-llama/Llama-3.2-3B-Instruct
+---
